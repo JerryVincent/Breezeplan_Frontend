@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from "react";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import { Button } from "react-bootstrap";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+function Starting() {
+  const [users, setUsers] = useState([
+    { age: "", gender: "", fitnessLevel: "" },
+  ]);
+  const [commonFields, setCommonFields] = useState({
+    timeToSpend: "",
+    caloriesToBurn: "",
+  });
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleInputChange = (index, field, value) => {
+    const updatedUsers = [...users];
+    updatedUsers[index][field] = value;
+    setUsers(updatedUsers);
+  };
+
+  const handleCommonInputChange = (field, value) => {
+    setCommonFields({ ...commonFields, [field]: value });
+  };
+
+  const addUser = () => {
+    const incomplete = Object.values(users[currentIndex]).some((value) => !value);
+
+    if (incomplete) {
+      toast.warning("Please complete all fields for the current user!");
+      return;
+    }
+
+    if (!/^[0-9]+$/.test(users[currentIndex].age)) {
+      toast.info("Age must be a number!");
+      return;
+    }
+
+    setUsers([...users, { age: "", gender: "", fitnessLevel: "" }]);
+    setCurrentIndex(currentIndex + 1);
+    toast.info("Add the details of the new user");
+  };
+
+  const submitHandle = () => {
+    console.log(users);
+    
+    const commonIncomplete = Object.values(commonFields).some((value) => !value);
+
+    if (commonIncomplete) {
+      toast.warning("Please complete all common fields!");
+      return;
+    }
+
+    if (users.some((user) => Object.values(user).some((value) => !value))) {
+      toast.warning("Ensure all user details are filled before submitting!");
+      return;
+    }
+
+    toast.success("Details submitted successfully!");
+  };
+
+  return (
+    <div className="w-100 d-md-flex align-items-center justify-content-center">
+      <div className="border border-primary p-2 rounded w-75 mt-md-4" id="cont">
+        <p className="fs-5x text-center text-warning">
+          Please fill in the details below
+        </p>
+
+        {/* Common Fields */}
+        <Box
+          className="d-flex align-items-center justify-content-center flex-column text-light"
+          component="form"
+          noValidate
+          autoComplete="off"
+        >
+          <TextField
+            label="Time to Spend (in minutes)"
+            variant="outlined"
+            className="w-75 mt-3"
+            color="dark"
+            value={commonFields.timeToSpend}
+            onChange={(e) =>
+              handleCommonInputChange("timeToSpend", e.target.value)
+            }
+            focused
+          />
+          <TextField
+            label="Calories to Burn"
+            variant="outlined"
+            className="w-75 mt-3"
+            color="dark"
+            value={commonFields.caloriesToBurn}
+            onChange={(e) =>
+              handleCommonInputChange("caloriesToBurn", e.target.value)
+            }
+            focused
+          />
+        </Box>
+
+        {/* User-Specific Fields */}
+        {users.map((user, index) => (
+          <div key={index} hidden={index !== currentIndex}>
+            <Box
+              className="d-flex align-items-center justify-content-center flex-column text-light"
+              component="form"
+              noValidate
+              autoComplete="off"
+            >
+              <TextField
+                label="Age"
+                variant="outlined"
+                className="w-75 mt-3"
+                color="dark"
+                value={user.age}
+                onChange={(e) => handleInputChange(index, "age", e.target.value)}
+                focused
+              />
+              <FormControl className="w-75 mt-3" focused>
+                <InputLabel>Gender</InputLabel>
+                <Select
+                  value={user.gender}
+                  onChange={(e) =>
+                    handleInputChange(index, "gender", e.target.value)
+                  }
+                  label="Gender"
+                >
+                  <MenuItem value={"Male"}>Male</MenuItem>
+                  <MenuItem value={"Female"}>Female</MenuItem>
+                  <MenuItem value={"Other"}>Other</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl className="w-75 mt-3" focused>
+                <InputLabel>Fitness Level</InputLabel>
+                <Select
+                  value={user.fitnessLevel}
+                  onChange={(e) =>
+                    handleInputChange(index, "fitnessLevel", e.target.value)
+                  }
+                  label="Fitness Level"
+                >
+                  <MenuItem value={"Beginner"}>Beginner</MenuItem>
+                  <MenuItem value={"Intermediate"}>Intermediate</MenuItem>
+                  <MenuItem value={"Advanced"}>Advanced</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </div>
+        ))}
+
+        {/* Buttons */}
+        <div className="d-flex align-items-center justify-content-center mt-3">
+          {currentIndex === users.length - 1 && (
+            <Button variant="secondary" onClick={addUser}>
+              Add New User
+            </Button>
+          )}
+          <Button
+            variant="warning"
+            className="ms-3"
+            onClick={submitHandle}
+          >
+            Submit
+          </Button>
+        </div>
+      </div>
+      <ToastContainer theme="colored" autoClose={1500} position="top-center" />
+    </div>
+  );
+}
+
+export default Starting;

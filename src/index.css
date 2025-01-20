@@ -1,0 +1,19 @@
+*{
+  margin: 0px;
+  padding: 0px ;
+  scroll-behavior: smooth;
+}
+body{
+  padding-top: 50px;
+}
+@media(max-width:600px){
+  #outlined-basic{
+    width: 100% !important;
+  }
+  #cont{
+    width: 100% !important;
+    padding: 1px !important;
+    margin-top: 85px !important;
+    color: whitesmoke !important;
+  }
+}
