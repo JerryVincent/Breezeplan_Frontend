@@ -5,53 +5,98 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { Button, Card, Col, Row } from "react-bootstrap";
-import ListGroup from 'react-bootstrap/ListGroup';
+import { Col, Row } from "react-bootstrap";
+import ListGroup from "react-bootstrap/ListGroup";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import 'leaflet/dist/leaflet.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun } from "@fortawesome/free-solid-svg-icons";
-import { faLocationDot, faTemperatureHigh, faWind, faClock, faLink,faShield } from '@fortawesome/free-solid-svg-icons';
+import "leaflet/dist/leaflet.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSun,
+  faPlus,
+  faPaperPlane,
+  faUser,
+  faLocationDot,
+  faTemperatureHigh,
+  faWind,
+  faClock,
+  faLink,
+  faShield,
+} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import Modal from 'react-bootstrap/Modal';
+import Modal from "react-bootstrap/Modal";
 import { Link } from "react-router-dom";
-// Function to center the map when the userlocation changes
+
+/* ── MUI dark-theme overrides ── */
+const inputSx = {
+  "& .MuiOutlinedInput-root": {
+    color: "white",
+    "& fieldset": { borderColor: "rgba(13,202,240,0.35)" },
+    "&:hover fieldset": { borderColor: "rgba(13,202,240,0.65)" },
+    "&.Mui-focused fieldset": { borderColor: "#0dcaf0", borderWidth: "2px" },
+  },
+  "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.55)" },
+  "& .MuiInputLabel-root.Mui-focused": { color: "#0dcaf0" },
+};
+
+const selectSx = {
+  color: "white",
+  "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(13,202,240,0.35)" },
+  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(13,202,240,0.65)" },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#0dcaf0",
+    borderWidth: "2px",
+  },
+  "& .MuiSvgIcon-root": { color: "rgba(255,255,255,0.7)" },
+};
+
+const labelSx = {
+  color: "rgba(255,255,255,0.55)",
+  "&.Mui-focused": { color: "#0dcaf0" },
+};
+
+const menuProps = {
+  PaperProps: {
+    sx: {
+      bgcolor: "#0d1b3e",
+      border: "1px solid rgba(13,202,240,0.2)",
+      "& .MuiMenuItem-root": {
+        color: "rgba(255,255,255,0.85)",
+        "&:hover": { bgcolor: "rgba(13,202,240,0.1)" },
+        "&.Mui-selected": { bgcolor: "rgba(13,202,240,0.15)" },
+      },
+    },
+  },
+};
 
 function Starting() {
-
   const [show, setShow] = useState(false);
-  const [acts,setAct]=useState([])
+  const [acts, setAct] = useState([]);
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);  
-  const [,setNewuser]=useState(false)
-  const [weather,setWeather]=useState({})
-  const [full,setFull]=useState(false);
-  const [users, setUsers] = useState([
-    {gender: "", age: 0, fitnessLevel: "" },
-  ]);
-   const [location, setLocation] = useState(null);
-    useEffect(() => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.error('Error fetching location:', error);
-          }
-        );
-      } else {
-        console.error('Geolocation is not supported by this browser.');
-      }
-    }, []);
+  const handleShow = () => setShow(true);
+  const [, setNewuser] = useState(false);
+  const [weather, setWeather] = useState({});
+  const [full, setFull] = useState(false);
+  const [users, setUsers] = useState([{ gender: "", age: 0, fitnessLevel: "" }]);
+  const [location, setLocation] = useState(null);
 
-  const [commonFields, setCommonFields] = useState({
-    timeToSpend: ""
-  });
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        () => toast.error("Location access denied. Please enable location permissions and refresh.")
+      );
+    } else {
+      toast.error("Geolocation is not supported by your browser.");
+    }
+  }, []);
+
+  const [commonFields, setCommonFields] = useState({ timeToSpend: "" });
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleInputChange = (index, field, value) => {
@@ -66,12 +111,10 @@ function Starting() {
 
   const addUser = () => {
     const incomplete = Object.values(users[currentIndex]).some((value) => !value);
-
     if (incomplete) {
       toast.warning("Please complete all fields for the current user!");
       return;
     }
-
     if (!/^[0-9]+$/.test(users[currentIndex].age)) {
       toast.info("Age must be a number!");
       return;
@@ -82,253 +125,375 @@ function Starting() {
     }
     setUsers([...users, { gender: "", age: 0, fitnessLevel: "" }]);
     setCurrentIndex(currentIndex + 1);
-    setFull(false)
+    setFull(false);
     toast.info("Add the details of the new user");
-    setNewuser(true)
+    setNewuser(true);
   };
 
-  const submitHandle = async() => {
-
+  const submitHandle = async () => {
     const commonIncomplete = Object.values(commonFields).some((value) => !value);
-
     if (commonIncomplete) {
       toast.warning("Please complete all common fields!");
       return;
-    }
-    else if (users.some((user) => Object.values(user).some((value) => !value))) {
+    } else if (users.some((user) => Object.values(user).some((value) => !value))) {
       toast.warning("Ensure all user details are filled before submitting!");
       return;
-    }
-    else if (!/^[0-9]+$/.test(users[currentIndex].age)) {
+    } else if (!/^[0-9]+$/.test(users[currentIndex].age)) {
       toast.info("Age must be a number!");
       return;
-    }
-    else if (!/^[0-9]+$/.test(commonFields.timeToSpend)) {
+    } else if (!/^[0-9]+$/.test(commonFields.timeToSpend)) {
       toast.info("Time must be a number!");
       return;
     }
-      setFull(true)
-      setNewuser(false)
-      const result=await getWeather()
-      setWeather(result.data)
-      const {data}= await getActivities()
-      setAct(data?.data)
-      toast.success("Details submitted successfully!");
+    if (!location) {
+      toast.error("Location is not available. Please enable location permissions and try again.");
+      return;
+    }
+
+    setNewuser(false);
+
+    const weatherResult = await getWeather();
+    if (weatherResult instanceof Error || weatherResult?.response || !weatherResult?.data) {
+      const msg = weatherResult?.response?.data?.message || weatherResult?.message || "Failed to fetch weather data. Please try again.";
+      toast.error(msg);
+      return;
+    }
+    setWeather(weatherResult.data);
+
+    const activitiesResult = await getActivities(weatherResult.data);
+    if (activitiesResult instanceof Error || activitiesResult?.response || !activitiesResult?.data) {
+      const msg = activitiesResult?.response?.data?.message || activitiesResult?.message || "Failed to fetch activity suggestions. Please try again.";
+      toast.error(msg);
+      return;
+    }
+
+    setAct(activitiesResult.data?.data);
+    setFull(true);
+    toast.success("Details submitted successfully!");
   };
-  const [work,setWork]=useState({})
-  const cardHandle=(index)=>{
-    handleShow()
-    setWork(acts[index])
-  }
-  const getActivities=async()=>{
-    const match= weather?.temperature?.match(/[\d.]+/)
-    const temperature= match ? parseFloat(match[0]) : 0;
-    const match1= weather?.precipitation?.match(/[\d.]+/)
-    const precipitation= match1 ? parseFloat(match1[0]) : 0;
-    const match2= weather?.humidity?.match(/[\d.]+/)
-    const humidity= match2 ? parseFloat(match2[0]) : 0;
-    const match3= weather?.windSpeed?.match(/[\d.]+/)
-    const windspeed= match3 ? parseFloat(match3[0]) : 0;
+
+  const [work, setWork] = useState({});
+  const cardHandle = (index) => {
+    handleShow();
+    setWork(acts[index]);
+  };
+
+  const getActivities = async (weatherData) => {
+    const match = weatherData?.temperature?.match(/[\d.]+/);
+    const temperature = match ? parseFloat(match[0]) : 0;
+    const match1 = weatherData?.precipitation?.match(/[\d.]+/);
+    const precipitation = match1 ? parseFloat(match1[0]) : 0;
+    const match2 = weatherData?.humidity?.match(/[\d.]+/);
+    const humidity = match2 ? parseFloat(match2[0]) : 0;
+    const match3 = weatherData?.windSpeed?.match(/[\d.]+/);
+    const windspeed = match3 ? parseFloat(match3[0]) : 0;
     return await axios({
-      method:'POST',
-      url:`http://localhost:5000/suggestionEngine/activitySuggestions`,
-      data:{
-        "longitude": parseInt(location?.lng),
-        "latitude": parseInt(location?.lat),
-        "temperature": temperature,
-        "humidity": humidity,
-        "windSpeed": windspeed,
-        "precipitation": precipitation,
-        "members": users,
-        "timeRange": parseInt(commonFields.timeToSpend)
+      method: "POST",
+      url: `http://localhost:5000/suggestionEngine/activitySuggestions`,
+      data: {
+        longitude: parseInt(location?.lng),
+        latitude: parseInt(location?.lat),
+        temperature,
+        humidity,
+        windSpeed: windspeed,
+        precipitation,
+        members: users,
+        timeRange: parseInt(commonFields.timeToSpend),
       },
-      headers:{"Content-Type":'application/json'}
-    }).then((response)=>{return response}).catch((err)=>{return err})
-  }
-  const getWeather=async()=>{
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response)
+      .catch((err) => err);
+  };
+
+  const getWeather = async () => {
     return await axios({
-      method:'POST',
-      url:`http://127.0.0.1:5000/weather/weatherData?latitude=${location?.lat}&longitude=${location?.lng}`,
-      data:'',
-      headers:{"Content-Type":'application/json'}
-    }).then((response)=>{return response}).catch((err)=>{return err})
-  }
+      method: "POST",
+      url: `http://127.0.0.1:5000/weather/weatherData?latitude=${location?.lat}&longitude=${location?.lng}`,
+      data: "",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response)
+      .catch((err) => err);
+  };
 
+  const timeStamp = new Intl.DateTimeFormat("en-GB", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date());
 
-  let time=new Date()
-  let timeStamp= new Intl.DateTimeFormat("en-GB",{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(time)
   return (
-    <div className="w-100 d-md-flex align-items-center justify-content-center">
-      {!full && <div className="border border-primary p-2 rounded w-75 mt-md-4 form-section" id="cont">
-        {users.length>1 && <div className="d-flex align-items-center justify-content-center">{users.map((user,index)=>(
-          (user.age !== '' && user.gender !== '') &&
-          <Card key={index} style={{ width: '18rem' }}>
-          <Card.Body>
-            <Card.Title className="text-center">Person {index+1}</Card.Title>
-            <Card.Text>
-              <div className="d-flex justify-content-center w-100">
-                <p>Age: {user.age}</p>
-                <p className="ms-3">Gender: {user.gender}</p>
-              </div>
-            </Card.Text>
-          </Card.Body>
-        </Card>
-        ))}</div>}
-        <p className="fs-5x text-center text-warning">
-          Please fill in the details below
-        </p>
-
-        {/* Common Fields */}
-        <Box
-          className="d-flex align-items-center justify-content-center flex-column text-light"
-          component="form"
-          noValidate
-          autoComplete="off"
-        >
-          <TextField
-            label="Time to Spend (in minutes)"
-            variant="outlined"
-            className="w-75 mt-3"
-            color="dark"
-            value={commonFields.timeToSpend}
-            onChange={(e) =>
-              handleCommonInputChange("timeToSpend", e.target.value)
-            }
-            focused
-          />
-        </Box>
-
-        {/* User-Specific Fields */}
-        {users.map((user, index) => (
-          <div key={index} hidden={index !== currentIndex}>
-            <Box
-              className="d-flex align-items-center justify-content-center flex-column text-light"
-              component="form"
-              noValidate
-              autoComplete="off"
-            >
-              <TextField
-                label="Age"
-                variant="outlined"
-                className="w-75 mt-4"
-                color="dark"
-                // value={user.age}
-                onChange={(e) => handleInputChange(index, "age", parseInt(e.target.value))}
-                focused
-              />
-              <FormControl className="w-75 mt-4" focused>
-                <InputLabel color="dark">Gender</InputLabel>
-                <Select
-                  color="dark"
-                  value={user.gender}
-                  onChange={(e) =>
-                    handleInputChange(index, "gender", e.target.value)
-                  }
-                  label="Gender"
-                >
-                  <MenuItem value={"Male"}>Male</MenuItem>
-                  <MenuItem value={"Female"}>Female</MenuItem>
-                  <MenuItem value={"Other"}>Other</MenuItem>
-                </Select>
-              </FormControl>
-             
-              <FormControl className="w-75 mt-4" focused>
-                <InputLabel color="dark">Fitness Level</InputLabel>
-                <Select
-                color="dark"
-                  value={user.fitnessLevel}
-                  onChange={(e) =>
-                    handleInputChange(index, "fitnessLevel", e.target.value)
-                  }
-                  label="Fitness Level"
-                >
-                  <MenuItem value={"Beginner"}>Beginner</MenuItem>
-                  <MenuItem value={"Intermediate"}>Intermediate</MenuItem>
-                  <MenuItem value={"Advanced"}>Advanced</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </div>
-        ))}
-
-        {/* Buttons */}
-        <div className="d-flex align-items-center justify-content-center mt-5 mb-5">
-          {currentIndex === users.length - 1 && (
-            <Button variant="primary" onClick={addUser}>
-              Add New User
-            </Button>
+    <div className="suggestion-page">
+      {/* ── FORM ── */}
+      {!full && (
+        <div className="suggestion-form-glass">
+          {/* Person chips */}
+          {users.length > 1 && (
+            <div className="person-chips-wrap">
+              {users.map((user, index) =>
+                user.age !== "" && user.gender !== "" ? (
+                  <div key={index} className="person-chip">
+                    <span className="chip-num">{index + 1}</span>
+                    <span>
+                      {user.gender}, {user.age} yrs
+                    </span>
+                  </div>
+                ) : null
+              )}
+            </div>
           )}
-          <Button
-            variant="warning"
-            className="ms-3"
-            onClick={submitHandle}
-          >
-            Submit
-          </Button>
-    
+
+          {/* Header */}
+          <div className="text-center mb-4">
+            <div className="step-badge">
+              <FontAwesomeIcon icon={faUser} />
+              &nbsp;Person {currentIndex + 1}
+            </div>
+            <h2 className="form-page-title">Plan Your Adventure</h2>
+            <p className="form-page-sub">
+              Share your group details to get personalised outdoor suggestions
+            </p>
+          </div>
+
+          {/* Common field */}
+          <Box className="d-flex flex-column gap-4" component="form" noValidate autoComplete="off">
+            <TextField
+              label="Time Available (minutes)"
+              variant="outlined"
+              fullWidth
+              sx={inputSx}
+              value={commonFields.timeToSpend}
+              onChange={(e) => handleCommonInputChange("timeToSpend", e.target.value)}
+            />
+          </Box>
+
+          {/* Per-user fields */}
+          {users.map((user, index) => (
+            <div key={index} hidden={index !== currentIndex}>
+              <Box
+                className="d-flex flex-column gap-4 mt-4"
+                component="form"
+                noValidate
+                autoComplete="off"
+              >
+                <TextField
+                  label="Age"
+                  variant="outlined"
+                  fullWidth
+                  sx={inputSx}
+                  onChange={(e) =>
+                    handleInputChange(index, "age", parseInt(e.target.value))
+                  }
+                />
+                <FormControl fullWidth>
+                  <InputLabel sx={labelSx}>Gender</InputLabel>
+                  <Select
+                    value={user.gender}
+                    onChange={(e) => handleInputChange(index, "gender", e.target.value)}
+                    label="Gender"
+                    sx={selectSx}
+                    MenuProps={menuProps}
+                  >
+                    <MenuItem value={"Male"}>Male</MenuItem>
+                    <MenuItem value={"Female"}>Female</MenuItem>
+                    <MenuItem value={"Other"}>Other</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                  <InputLabel sx={labelSx}>Fitness Level</InputLabel>
+                  <Select
+                    value={user.fitnessLevel}
+                    onChange={(e) =>
+                      handleInputChange(index, "fitnessLevel", e.target.value)
+                    }
+                    label="Fitness Level"
+                    sx={selectSx}
+                    MenuProps={menuProps}
+                  >
+                    <MenuItem value={"Beginner"}>Beginner</MenuItem>
+                    <MenuItem value={"Intermediate"}>Intermediate</MenuItem>
+                    <MenuItem value={"Advanced"}>Advanced</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </div>
+          ))}
+
+          {/* Buttons */}
+          <div className="d-flex align-items-center justify-content-center gap-3 mt-5 flex-wrap">
+            {currentIndex === users.length - 1 && (
+              <button className="form-btn-add" onClick={addUser}>
+                <FontAwesomeIcon icon={faPlus} /> Add Person
+              </button>
+            )}
+            <button className="form-btn-submit" onClick={submitHandle}>
+              <FontAwesomeIcon icon={faPaperPlane} /> Get Suggestions
+            </button>
+          </div>
         </div>
-      </div>}
-      {full && <div className="w-100 mt-4 p-3 border border-info rounded">
-      <div className="w-100 mb-2 d-flex align-items-center justify-content-center weather-section" style={{background:'url("https://i.gifer.com/SBMh.gif")',height:'200px', backgroundRepeat:"no-repeat",backgroundSize:"cover"}}>
-      <Card style={{ width: '25rem' }} border="info">
-      <ListGroup variant="flush">
-        <ListGroup.Item className=" bg-dark text-light fs-3x text-shadow fa-lg-xl p-3">
-        <FontAwesomeIcon icon={faTemperatureHigh} fade  className="me-5" size="xl"/>Temperature:   {weather?.temperature}</ListGroup.Item>
-        <ListGroup.Item className="text-primary fa-lg-xl p-3">
-        <FontAwesomeIcon icon={faWind} fade className="me-5" size="xl"/>
-          Wind Speed: {weather?.windSpeed}</ListGroup.Item>
-    <ListGroup.Item className=" bg-dark text-light text-shadow p-3">
-    <FontAwesomeIcon icon={faClock} fade className="me-5" size="xl"/> 
-      {timeStamp}, Muenster
-    </ListGroup.Item>
-      </ListGroup>
-    </Card>     
-      </div>
-<div className="container w-100">
-      <h3 className="text-center text-info">Suggested Activities</h3>
-      <Row className="w-100 mt-3 ms-1">
-        {acts?.map((activity,index)=>(
-            <Col key={index} sm={12} lg={6} className="d-flex align-items-center justify-content-center p-3">
-            <Card className="activity-card" style={{ width: '100%' }} onClick={()=>{cardHandle(index);}}>
-          <Card.Img variant="top" src={activity.image} style={{height:'300px'}}/>
-          <Card.Body>
-            <Card.Title className="text-center text-info fa-xl">{activity.activity}</Card.Title>
-            <Card.Text>
-              <p>{activity.description} {activity.groupSuitability}. Time Required is {activity.timeRequired}.</p>
-            </Card.Text>
-          </Card.Body>
-        </Card> 
-            </Col>
-        ))}  
-        </Row> 
-</div> 
-    </div>}
-      <Modal show={show} onHide={handleClose} animation={false} size="lg">
-        <Modal.Header closeButton className="d-flex justify-content-center">
+      )}
+
+      {/* ── RESULTS ── */}
+      {full && (
+        <div className="w-100">
+          {/* Weather hero */}
+          <div className="weather-hero mb-4">
+            <div className="weather-hero-overlay" />
+            <div className="weather-stats-row">
+              <div className="weather-location-badge">
+                <FontAwesomeIcon icon={faLocationDot} />
+                &nbsp;Muenster
+              </div>
+              <div className="w-100 d-flex flex-wrap gap-3 justify-content-center mt-2">
+                <div className="weather-stat-item">
+                  <FontAwesomeIcon
+                    icon={faTemperatureHigh}
+                    className="weather-stat-icon text-warning"
+                  />
+                  <span className="weather-stat-label">Temperature</span>
+                  <span className="weather-stat-value">{weather?.temperature}</span>
+                </div>
+                <div className="weather-stat-item">
+                  <FontAwesomeIcon
+                    icon={faWind}
+                    className="weather-stat-icon text-info"
+                  />
+                  <span className="weather-stat-label">Wind Speed</span>
+                  <span className="weather-stat-value">{weather?.windSpeed}</span>
+                </div>
+                <div className="weather-stat-item">
+                  <FontAwesomeIcon
+                    icon={faClock}
+                    className="weather-stat-icon"
+                    style={{ color: "rgba(255,255,255,0.7)" }}
+                  />
+                  <span className="weather-stat-label">Time</span>
+                  <span className="weather-stat-value" style={{ fontSize: "0.75rem" }}>
+                    {timeStamp}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Activities header */}
+          <div className="activities-header">
+            <h3 className="activities-title">Suggested Activities</h3>
+            <p className="activities-sub">
+              Tap any card for location details &amp; safety tips
+            </p>
+          </div>
+
+          {/* Activity cards grid */}
+          <Row className="g-4">
+            {acts?.map((activity, index) => (
+              <Col key={index} sm={12} lg={6}>
+                <div
+                  className="activity-card-dark"
+                  style={{ animationDelay: `${index * 0.1 + 0.05}s` }}
+                  onClick={() => cardHandle(index)}
+                >
+                  <div className="activity-card-img-wrap">
+                    <img src={activity.image} alt={activity.activity} />
+                    <div className="activity-card-img-overlay" />
+                  </div>
+                  <div className="activity-card-body">
+                    <div className="activity-card-title">{activity.activity}</div>
+                    <p className="activity-card-desc">{activity.description}</p>
+                    <div className="activity-card-meta">
+                      <span className="activity-tag">
+                        <FontAwesomeIcon icon={faClock} size="xs" />
+                        &nbsp;{activity.timeRequired}
+                      </span>
+                      <span className="activity-tag">{activity.groupSuitability}</span>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
+
+      {/* ── MODAL ── */}
+      <Modal show={show} onHide={handleClose} animation={false} size="lg" className="modal-dark">
+        <Modal.Header closeButton>
           <Modal.Title>{work.activity}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Row className="w-100">
-            <Col sm={12} lg={5} className="d-flex align-items-center justify-content-center">
-              <img src={work.image} alt="" style={{width:'100%', height:'250px'}}/>
+          <Row>
+            <Col
+              sm={12}
+              lg={5}
+              className="d-flex align-items-center justify-content-center mb-3 mb-lg-0"
+            >
+              <img
+                src={work.image}
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "250px",
+                  objectFit: "cover",
+                  borderRadius: "12px",
+                }}
+              />
             </Col>
-            <Col sm={12} lg={7} className="d-flex align-items-center justify-content-center">
-            <ListGroup className="w-100">
-              <ListGroup.Item><FontAwesomeIcon icon={faLocationDot} size="lg" className="me-2 text-danger"/><span>Location Name</span>: <span className="text-info">{work.locationInfo?.pathNameOrLocationName}</span></ListGroup.Item>
-              <ListGroup.Item><FontAwesomeIcon icon={faSun} size="lg" beat className="text-warning me-2"/><span >Lighting</span>: {work.locationInfo?.lighting}</ListGroup.Item>
-              <ListGroup.Item><span className="text-warning">Info</span>: {work.locationInfo?.description}</ListGroup.Item>
-              <ListGroup.Item ><FontAwesomeIcon icon={faShield} size="lg" className="me-2 text-success"/><span className="text-danger fa-md">Tips</span>: {work.locationInfo?.safetyTips.map((item, i)=>(<p key={i} className="ms-5">{item}</p>))}</ListGroup.Item>
-              <ListGroup.Item><Link to={work.locationInfo?.redirectUrl} target="_blank"><FontAwesomeIcon icon={faLink} size="lg"/> View in Google Maps</Link></ListGroup.Item>
-    </ListGroup>
+            <Col sm={12} lg={7}>
+              <ListGroup variant="flush">
+                <ListGroup.Item className="modal-list-item">
+                  <FontAwesomeIcon icon={faLocationDot} className="me-2 text-danger" />
+                  <span className="text-white-50">Location:</span>{" "}
+                  <span className="text-info">
+                    {work.locationInfo?.pathNameOrLocationName}
+                  </span>
+                </ListGroup.Item>
+                <ListGroup.Item className="modal-list-item">
+                  <FontAwesomeIcon icon={faSun} className="text-warning me-2" beat />
+                  <span className="text-white-50">Lighting:</span>{" "}
+                  {work.locationInfo?.lighting}
+                </ListGroup.Item>
+                <ListGroup.Item className="modal-list-item">
+                  <span className="text-warning">Info:</span>{" "}
+                  {work.locationInfo?.description}
+                </ListGroup.Item>
+                <ListGroup.Item className="modal-list-item">
+                  <FontAwesomeIcon icon={faShield} className="me-2 text-success" />
+                  <span className="text-danger">Safety Tips:</span>
+                  {work.locationInfo?.safetyTips.map((item, i) => (
+                    <p
+                      key={i}
+                      className="ms-4 mb-1 mt-1"
+                      style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.85rem" }}
+                    >
+                      {item}
+                    </p>
+                  ))}
+                </ListGroup.Item>
+                <ListGroup.Item className="modal-list-item">
+                  <Link
+                    to={work.locationInfo?.redirectUrl}
+                    target="_blank"
+                    className="text-info text-decoration-none"
+                  >
+                    <FontAwesomeIcon icon={faLink} className="me-2" />
+                    View in Google Maps
+                  </Link>
+                </ListGroup.Item>
+              </ListGroup>
             </Col>
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="danger" onClick={handleClose}>
+          <button className="form-btn-add" onClick={handleClose}>
             Close
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
+
       <ToastContainer theme="colored" autoClose={1500} position="top-center" />
     </div>
   );
