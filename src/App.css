@@ -325,6 +325,34 @@ body {
   background-clip: text;
 }
 
+.navbar-link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.navbar-link:hover {
+  color: #fff;
+  border-color: rgba(13, 202, 240, 0.3);
+  background: rgba(13, 202, 240, 0.08);
+}
+
+.navbar-link-primary {
+  color: #0dcaf0;
+  border-color: rgba(13, 202, 240, 0.35);
+}
+
+.navbar-link-primary:hover {
+  color: #fff;
+  background: rgba(13, 202, 240, 0.18);
+  border-color: #0dcaf0;
+}
+
 /* ===== SUGGESTION PAGE WRAPPER ===== */
 .suggestion-page {
   min-height: calc(100vh - 60px);
