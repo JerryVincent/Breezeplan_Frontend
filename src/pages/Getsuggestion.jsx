@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { Button, Card, CardBody, CardTitle, Col, Row } from "react-bootstrap";
+import { Button, Card, Col, Row } from "react-bootstrap";
 import ListGroup from 'react-bootstrap/ListGroup';
-import CardGroup from 'react-bootstrap/CardGroup';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useTheme } from '@mui/material/styles';
 import 'leaflet/dist/leaflet.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun } from "@fortawesome/free-solid-svg-icons";
 import { faLocationDot, faTemperatureHigh, faWind, faClock, faLink,faShield } from '@fortawesome/free-solid-svg-icons';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import axios from "axios";
 import Modal from 'react-bootstrap/Modal';
-import GoogleMapReact from 'google-map-react';
-import { data, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 // Function to center the map when the userlocation changes
 
 function Starting() {
@@ -28,7 +24,7 @@ function Starting() {
   const [acts,setAct]=useState([])
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);  
-  const [newUser,setNewuser]=useState(false)
+  const [,setNewuser]=useState(false)
   const [weather,setWeather]=useState({})
   const [full,setFull]=useState(false);
   const [users, setUsers] = useState([
@@ -114,19 +110,15 @@ function Starting() {
       setFull(true)
       setNewuser(false)
       const result=await getWeather()
-      console.log(result.data)
       setWeather(result.data)
       const {data}= await getActivities()
-      console.log(data.data); 
-      setAct(data?.data)        
+      setAct(data?.data)
       toast.success("Details submitted successfully!");
   };
-  const [id,setId]= useState('')
   const [work,setWork]=useState({})
-  const cardHandle=(id)=>{
-    setId(id)
+  const cardHandle=(index)=>{
     handleShow()
-    setWork(acts[id])
+    setWork(acts[index])
   }
   const getActivities=async()=>{
     const match= weather?.temperature?.match(/[\d.]+/)
@@ -165,15 +157,12 @@ function Starting() {
 
   let time=new Date()
   let timeStamp= new Intl.DateTimeFormat("en-GB",{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(time)
-  // console.log(timeStamp)
-  // console.log(details);
-  console.log(acts);
   return (
     <div className="w-100 d-md-flex align-items-center justify-content-center">
-      {!full && <div className="border border-primary p-2 rounded w-75 mt-md-4" id="cont">
+      {!full && <div className="border border-primary p-2 rounded w-75 mt-md-4 form-section" id="cont">
         {users.length>1 && <div className="d-flex align-items-center justify-content-center">{users.map((user,index)=>(
-          (user.age!='' && user.gender!='') &&
-          <Card style={{ width: '18rem' }}>
+          (user.age !== '' && user.gender !== '') &&
+          <Card key={index} style={{ width: '18rem' }}>
           <Card.Body>
             <Card.Title className="text-center">Person {index+1}</Card.Title>
             <Card.Text>
@@ -280,7 +269,7 @@ function Starting() {
         </div>
       </div>}
       {full && <div className="w-100 mt-4 p-3 border border-info rounded">
-      <div className="w-100 mb-2 d-flex align-items-center justify-content-center" style={{background:'url("https://i.gifer.com/SBMh.gif")',height:'200px', backgroundRepeat:"no-repeat",backgroundSize:"cover"}}>
+      <div className="w-100 mb-2 d-flex align-items-center justify-content-center weather-section" style={{background:'url("https://i.gifer.com/SBMh.gif")',height:'200px', backgroundRepeat:"no-repeat",backgroundSize:"cover"}}>
       <Card style={{ width: '25rem' }} border="info">
       <ListGroup variant="flush">
         <ListGroup.Item className=" bg-dark text-light fs-3x text-shadow fa-lg-xl p-3">
@@ -299,8 +288,8 @@ function Starting() {
       <h3 className="text-center text-info">Suggested Activities</h3>
       <Row className="w-100 mt-3 ms-1">
         {acts?.map((activity,index)=>(
-            <Col sm={12} lg={6} className="d-flex align-items-center justify-content-center p-3">
-            <Card style={{ width: '100%' }} onClick={(e)=>{cardHandle(index);}}>
+            <Col key={index} sm={12} lg={6} className="d-flex align-items-center justify-content-center p-3">
+            <Card className="activity-card" style={{ width: '100%' }} onClick={()=>{cardHandle(index);}}>
           <Card.Img variant="top" src={activity.image} style={{height:'300px'}}/>
           <Card.Body>
             <Card.Title className="text-center text-info fa-xl">{activity.activity}</Card.Title>
@@ -328,7 +317,7 @@ function Starting() {
               <ListGroup.Item><FontAwesomeIcon icon={faLocationDot} size="lg" className="me-2 text-danger"/><span>Location Name</span>: <span className="text-info">{work.locationInfo?.pathNameOrLocationName}</span></ListGroup.Item>
               <ListGroup.Item><FontAwesomeIcon icon={faSun} size="lg" beat className="text-warning me-2"/><span >Lighting</span>: {work.locationInfo?.lighting}</ListGroup.Item>
               <ListGroup.Item><span className="text-warning">Info</span>: {work.locationInfo?.description}</ListGroup.Item>
-              <ListGroup.Item ><FontAwesomeIcon icon={faShield} size="lg" className="me-2 text-success"/><span className="text-danger fa-md">Tips</span>: {work.locationInfo?.safetyTips.map((item)=>(<p className="ms-5">{item}</p>))}</ListGroup.Item>
+              <ListGroup.Item ><FontAwesomeIcon icon={faShield} size="lg" className="me-2 text-success"/><span className="text-danger fa-md">Tips</span>: {work.locationInfo?.safetyTips.map((item, i)=>(<p key={i} className="ms-5">{item}</p>))}</ListGroup.Item>
               <ListGroup.Item><Link to={work.locationInfo?.redirectUrl} target="_blank"><FontAwesomeIcon icon={faLink} size="lg"/> View in Google Maps</Link></ListGroup.Item>
     </ListGroup>
             </Col>

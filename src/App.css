@@ -1,0 +1,315 @@
+/* ===== BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+body {
+  padding-top: 50px;
+}
+
+/* ===== KEYFRAMES ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 18px rgba(13, 202, 240, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(13, 202, 240, 0.75);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.07;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.13;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== LANDING — HERO ===== */
+.landing-hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #04091f 0%, #0b1a40 45%, #122d60 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ambient blobs */
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.bg-blob-1 {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, #0dcaf0 0%, transparent 70%);
+  top: -180px;
+  left: -180px;
+  animation: breathe 5s ease-in-out infinite;
+}
+.bg-blob-2 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, #0d6efd 0%, transparent 70%);
+  bottom: -130px;
+  right: -130px;
+  animation: breathe 6s ease-in-out 1.5s infinite;
+}
+.bg-blob-3 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, #6610f2 0%, transparent 70%);
+  top: 55%;
+  left: 55%;
+  animation: breathe 7s ease-in-out 3s infinite;
+}
+
+/* Content wrapper — hidden until .visible toggled */
+.landing-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.landing-content.visible {
+  opacity: 1;
+}
+
+/* Staggered children */
+.landing-content.visible .anim-icons {
+  animation: fadeIn 0.7s ease 0.1s both;
+}
+.landing-content.visible .landing-title {
+  animation: fadeInUp 0.8s ease 0.25s both;
+}
+.landing-content.visible .landing-sub {
+  animation: fadeInUp 0.8s ease 0.45s both;
+}
+.landing-content.visible .glass-card {
+  animation: fadeInUp 0.8s ease 0.65s both;
+}
+.landing-content.visible .cta-btn {
+  animation: fadeInUp 0.8s ease 0.85s both;
+}
+
+/* Title */
+.landing-title {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 800;
+  letter-spacing: -2px;
+  text-shadow: 0 0 40px rgba(13, 202, 240, 0.5);
+  line-height: 1.05;
+  margin-bottom: 1rem;
+}
+
+.landing-sub {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  max-width: 560px;
+  margin: 0 auto 2rem;
+  line-height: 1.8;
+}
+
+/* Floating icons */
+.anim-icons svg {
+  animation: float 3.5s ease-in-out infinite;
+}
+.anim-icons svg:nth-child(2) {
+  animation-delay: 0.6s;
+}
+.anim-icons svg:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  padding: 2rem 2.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  animation: float 5.5s ease-in-out 1.5s infinite;
+}
+
+/* Feature badges */
+.feature-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(13, 202, 240, 0.1);
+  border: 1px solid rgba(13, 202, 240, 0.3);
+  color: #d0f5ff;
+  border-radius: 50px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+.feature-badge:hover {
+  background: rgba(13, 202, 240, 0.2);
+  border-color: rgba(13, 202, 240, 0.6);
+}
+
+/* CTA button */
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0dcaf0, #0d6efd);
+  color: #fff;
+  border: none;
+  padding: 0.9rem 2.6rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  animation: pulseGlow 2.5s ease-in-out infinite;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.cta-btn:hover {
+  transform: scale(1.06) translateY(-3px);
+  box-shadow: 0 10px 35px rgba(13, 202, 240, 0.55);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ===== GETSUGGESTION — FORM ===== */
+.form-section {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* ===== GETSUGGESTION — WEATHER ===== */
+.weather-section {
+  animation: slideInLeft 0.7s ease forwards;
+}
+
+/* ===== GETSUGGESTION — ACTIVITY CARDS ===== */
+.activity-card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease !important;
+  cursor: pointer;
+  border-radius: 14px !important;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeInUp 0.55s ease forwards;
+}
+.activity-card:hover {
+  transform: translateY(-10px) scale(1.02) !important;
+  box-shadow: 0 18px 45px rgba(13, 202, 240, 0.28) !important;
+}
+
+/* Stagger delays for up to 8 cards */
+.activity-card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.activity-card:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.activity-card:nth-child(3) {
+  animation-delay: 0.25s;
+}
+.activity-card:nth-child(4) {
+  animation-delay: 0.35s;
+}
+.activity-card:nth-child(5) {
+  animation-delay: 0.45s;
+}
+.activity-card:nth-child(6) {
+  animation-delay: 0.55s;
+}
+.activity-card:nth-child(7) {
+  animation-delay: 0.65s;
+}
+.activity-card:nth-child(8) {
+  animation-delay: 0.75s;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  #outlined-basic {
+    width: 100% !important;
+  }
+  #cont {
+    width: 100% !important;
+    padding: 1px !important;
+    margin-top: 85px !important;
+    color: whitesmoke !important;
+  }
+  .glass-card {
+    padding: 1.5rem 1rem;
+  }
+}
