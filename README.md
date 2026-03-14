@@ -124,6 +124,8 @@ uvicorn main:app --host 127.0.0.1 --port 5000 --reload
 The API will be available at `http://localhost:5000`
 Interactive docs at `http://localhost:5000/docs`
 
+> **Live deployment:** `https://breezeplan-api.onrender.com` — interactive docs at `https://breezeplan-api.onrender.com/docs`
+
 ---
 
 ### Build Frontend for Production

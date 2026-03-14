@@ -189,7 +189,7 @@ function Starting() {
     const windspeed = match3 ? parseFloat(match3[0]) : 0;
     return await axios({
       method: "POST",
-      url: `http://localhost:5000/suggestionEngine/activitySuggestions`,
+      url: `https://breezeplan-api.onrender.com/suggestionEngine/activitySuggestions`,
       data: {
         longitude: parseInt(location?.lng),
         latitude: parseInt(location?.lat),
@@ -209,7 +209,7 @@ function Starting() {
   const getWeather = async () => {
     return await axios({
       method: "POST",
-      url: `http://127.0.0.1:5000/weather/weatherData?latitude=${location?.lat}&longitude=${location?.lng}`,
+      url: `https://breezeplan-api.onrender.com/weather/weatherData?latitude=${location?.lat}&longitude=${location?.lng}`,
       data: "",
       headers: { "Content-Type": "application/json" },
     })
