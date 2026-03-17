@@ -77,6 +77,8 @@ function Starting() {
   const [, setNewuser] = useState(false);
   const [weather, setWeather] = useState({});
   const [full, setFull] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState("");
   const [users, setUsers] = useState([{ gender: "", age: 0, fitnessLevel: "" }]);
   const [location, setLocation] = useState(null);
 
@@ -151,23 +153,32 @@ function Starting() {
     }
 
     setNewuser(false);
+    setLoading(true);
+    setLoadingStep("Fetching weather data...");
 
     const weatherResult = await getWeather();
     if (weatherResult instanceof Error || weatherResult?.response || !weatherResult?.data) {
       const msg = weatherResult?.response?.data?.message || weatherResult?.message || "Failed to fetch weather data. Please try again.";
       toast.error(msg);
+      setLoading(false);
+      setLoadingStep("");
       return;
     }
     setWeather(weatherResult.data);
+    setLoadingStep("Finding activities for you...");
 
     const activitiesResult = await getActivities(weatherResult.data);
     if (activitiesResult instanceof Error || activitiesResult?.response || !activitiesResult?.data) {
       const msg = activitiesResult?.response?.data?.message || activitiesResult?.message || "Failed to fetch activity suggestions. Please try again.";
       toast.error(msg);
+      setLoading(false);
+      setLoadingStep("");
       return;
     }
 
     setAct(activitiesResult.data?.data);
+    setLoading(false);
+    setLoadingStep("");
     setFull(true);
     toast.success("Details submitted successfully!");
   };
@@ -326,14 +337,30 @@ function Starting() {
           {/* Buttons */}
           <div className="d-flex align-items-center justify-content-center gap-3 mt-5 flex-wrap">
             {currentIndex === users.length - 1 && (
-              <button className="form-btn-add" onClick={addUser}>
+              <button className="form-btn-add" onClick={addUser} disabled={loading}>
                 <FontAwesomeIcon icon={faPlus} /> Add Person
               </button>
             )}
-            <button className="form-btn-submit" onClick={submitHandle}>
-              <FontAwesomeIcon icon={faPaperPlane} /> Get Suggestions
+            <button className="form-btn-submit" onClick={submitHandle} disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="btn-spinner" /> {loadingStep || "Loading..."}
+                </>
+              ) : (
+                <><FontAwesomeIcon icon={faPaperPlane} /> Get Suggestions</>
+              )}
             </button>
           </div>
+
+          {/* Loading overlay */}
+          {loading && (
+            <div className="loading-overlay">
+              <div className="loading-orb" />
+              <div className="loading-orb loading-orb--2" />
+              <div className="loading-orb loading-orb--3" />
+              <p className="loading-step-text">{loadingStep}</p>
+            </div>
+          )}
         </div>
       )}
 

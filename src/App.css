@@ -501,9 +501,80 @@ body {
     box-shadow 0.2s;
   box-shadow: 0 4px 20px rgba(13, 202, 240, 0.3);
 }
-.form-btn-submit:hover {
+.form-btn-submit:hover:not(:disabled) {
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 8px 30px rgba(13, 202, 240, 0.48);
+}
+.form-btn-submit:disabled,
+.form-btn-add:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Button spinner ── */
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Loading overlay ── */
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%       { transform: scale(1.45); opacity: 0.4; }
+}
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 10, 30, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.loading-orb {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0dcaf0 0%, transparent 70%);
+  animation: orb-pulse 1.4s ease-in-out infinite;
+}
+.loading-orb--2 {
+  width: 120px;
+  height: 120px;
+  animation-delay: 0.25s;
+  background: radial-gradient(circle, #0d6efd 0%, transparent 70%);
+  opacity: 0.6;
+}
+.loading-orb--3 {
+  width: 60px;
+  height: 60px;
+  animation-delay: 0.5s;
+  background: radial-gradient(circle, #6610f2 0%, transparent 70%);
+  opacity: 0.7;
+}
+.loading-step-text {
+  position: relative;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-top: 80px;
+  text-shadow: 0 0 12px rgba(13, 202, 240, 0.6);
 }
 
 /* ===== WEATHER HERO ===== */
